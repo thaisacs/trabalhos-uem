@@ -7,15 +7,27 @@ Created on Fri May 17 17:36:24 2019
 """
 
 from library import images
+from library import algorithms
 import cv2
 
 imgName = 'images/strawberries_fullcolor.tif'
+n = 50
+mode = 1
+# 1: Uniform
+# 2: Median Cut
 
 def main():
-    img = images.readRGB(imgName)
-    images.show('img in', img)
+    img_in = images.readRGB(imgName)
     
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if(mode == 1):
+        img_out = uniform(img_in, n);
+    else:
+        img_out = medianCut(img_in, n);
+    
+    images.showRGB('image in', img_in)
+    images.showRGB('image out', img_out)
+    
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 
 main()
