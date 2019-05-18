@@ -1,5 +1,4 @@
 import cv2
-#import matplotlib.pyplot as plt
 
 def readSG(name): # read shades of gray image
     return cv2.imread(name, 0)

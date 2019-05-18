@@ -8,7 +8,6 @@ Created on Fri May 17 17:36:24 2019
 
 from library import images
 from library import algorithms
-import cv2
 
 imgName = 'images/strawberries_fullcolor.tif'
 n = 50
