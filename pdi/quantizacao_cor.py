@@ -18,7 +18,6 @@ for i in range(0,len(img)):
         k, = np.where(a == m) 
         img[i][j] = colors[k]
 
-
 cv2.imshow('image in',img_in)
 cv2.imshow('image',img)
 cv2.waitKey(0)

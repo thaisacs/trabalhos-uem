@@ -1,18 +1,18 @@
 from enum import Enum
 
-class InputFileType(Enum):
-    NoneType = 0
-    MorseType = 1
-    TxtType = 2
-    AudioType = 3
+class Type(Enum):
+    TEXT = 1
+    MORSE = 2
+    WAV = 3
+    OTHER = 4
 
-class Input:
-    def __init__(This, FileName):
-        This.Name = FileName
-        if(FileName.find(".txt") != -1):
-            This.Type = InputFileType.TxtType
-        elif(FileName.find(".morse") != -1):
-            This.Type = InputFileType.MorseType
-        else:
-            This.Type = InputFileType.AudioType
+def getFileType(FileName):
+    if(FileName.find(".txt") != -1):
+        return Type.TEXT
+    elif(FileName.find(".morse") != -1):
+        return Type.MORSE
+    elif(FileName.find(".wav") != -1):
+        return Type.WAV
+    else:
+        return Type.OTHER
 

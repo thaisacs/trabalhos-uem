@@ -11,7 +11,7 @@ import cv2
 
 imgName = 'images/strawberries_fullcolor.tif'
 n = 50
-mode = 1
+mode = 2
 # 1: Uniform
 # 2: Median Cut
 
@@ -55,7 +55,25 @@ def uniform(img_in, n):
 
     return cv2.merge([r,g,b])
 
+def calculateContrast(band):
+    min = band.min()
+    max = band.max()
+    return max - min
+
+def cutting(br, bg, bb):
+    print(br)
+    print(bg)
+    print(bb)
+
 def medianCut(img_in, n):
+    r,g,b = cv2.split(img_in)
+    
+    br = np.array(r)
+    bg = np.array(g)
+    bb = np.array(b)
+    
+    cutting(br, bg, bb)
+    
     return img_in
 
 def main():
