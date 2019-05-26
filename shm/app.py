@@ -21,9 +21,8 @@ def main():
         #audio2text()
         #audio2morse()
     elif(FileType == input.Type.MORSE):
-        Text = file.readTextFile(FileName) 
-        print(Text)
-        #morse2text()
+        Code = file.readTextFile(FileName) 
+        Text = translator.morse2text(Code)
         #morse2audio()
     else:
         print("error")

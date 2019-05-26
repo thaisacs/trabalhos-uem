@@ -1,42 +1,82 @@
 from library import audio
+from library import config 
 
-Code = {' ': '\ ', 'a': '0111 ', 'b': '111000 ', 'c': '11101110 ', 'd': '11100 ', 
-        'e': '0 ', 'f': '001110 ', 'g': '1111110 ', 'h': '0000 ', 'i': '00 ', 
-        'j': '0111111111 ', 'k': '1110111 ', 'l': '011100 ', 'm': '111111 ',
-        'n': '1110 ', 'o': '111111111 ', 'p': '01111110 ', 'q': '1111110111 ', 
-        'r': '01110 ', 's': '000 ', 't': '111 ', 'u': '00111 ', 'v': '000111 ', 
-        'w': '0111111 ', 'x': '11100111 ', 'y': '1110111111 ', 'z': '11111100 ', 
-        '1': '0111111111111 ', '2': '00111111111 ', '3': '000111111 ', '4': '0000111 ', 
-        '5': '00000 ', '6': '1110000 ', '7': '111111000 ', '8': '11111111100 ', 
-        '9': '1111111111110 ', '0': '111111111111111 '}
+import matplotlib.pyplot as plt
+
+MorseDict = {'A': '10111', 'B': '111010101', 'C': '11101011101', 
+             'D': '1110101', 'E': '1', 'F': '101011101', 'G': '111011101', 
+             'H': '1010101', 'I': '101', 'J': '1011101110111', 
+             'K': '111010111', 'L': '101110101', 'M': '1110111', 
+             'N': '11101', 'O': '11101110111', 'P': '10111011101', 
+             'Q': '1110111010111', 'R': '1011101', 'S': '10101', 'T': '111', 
+             'U': '1010111', 'V': '101010111', 'W': '101110111', 
+             'X': '11101010111', 'Y': '1110101110111', 'Z': '11101110101', 
+             '1': '10111011101110111', '2': '101011101110111', 
+             '3': '1010101110111', '4': '10101010111', '5': '101010101', 
+             '6': '11101010101', '7': '1110111010101', '8': '111011101110101', 
+             '9': '11101110111011101', '0': '1110111011101110111', ' ': '0000000'}
+
+TextDict = {'10111': 'A', '111010101': 'B', '11101011101': 'C', 
+            '1110101': 'D', '1': 'E', '101011101': 'F', '111011101': 'G', 
+            '1010101': 'H', '101': 'I', '1011101110111': 'J', 
+            '111010111': 'K', '101110101': 'L', '1110111': 'M', 
+            '11101': 'N', '11101110111': 'O', '10111011101': 'P', 
+            '1110111010111': 'Q', '1011101': 'R', '10101': 'S', '111': 'T', 
+            '1010111': 'U', '101010111': 'V', '101110111': 'W', 
+            '11101010111': 'X', '1110101110111': 'Y', '11101110101': 'Z', 
+            '10111011101110111': '1', '101011101110111': '2', 
+            '1010101110111': '3', '10101010111': '4', '101010101': '5', 
+            '11101010101': '6', '1110111010101': '7', '111011101110101': '8', 
+            '11101110111011101': '9', '1110111011101110111': '0'}
 
 def text2morse(Text):
     MorseCode = ""
 
-    for c in Text:
-        MorseCode += Code[c.lower()]
+    for Index in range(0, len(Text)):
+        MorseCode += MorseDict[Text[Index].upper()]
+        if(Text[Index] != ' ' and Index < len(Text) - 1):
+            if(Text[Index+1] != ' '):
+                MorseCode += "000"
 
     return MorseCode
 
 def morse2text(Code):
-    print("morse2text")
+    Code = Code.split("0000000")
+
+    for i in range(0, len(Code)):
+        Code[i] = Code[i].split("000")
+
+    Text = ""
+
+    for w in Code:
+        for l in w:
+            Text += TextDict[l]
+        Text += " "
+    
+    return Text
 
 def morse2audio(Code):
     Wave = []
    
-    CodeSplit = Code.split()
-    for i in CodeSplit:
-        for j in i:
-            if(j == '1'):
-                Unit = audio.generateWave(440)
-            elif(j == '0'):
-                Unit = audio.generateWave(840)
-            else:
-                Unit = audio.generateWave(1500)
-            Wave += Unit
-        Unit = audio.generateWave(0)
-        Wave += Unit
+    Code = Code.split("0000000")
 
+    for i in range(0, len(Code)):
+        Code[i] = Code[i].split("000")
+    
+    for i in range(0, len(Code)):
+        for j in range(0, len(Code[i])):
+            Code[i][j] = Code[i][j].split("0")
+    
+    for i in range(0, len(Code)):
+        for j in range(0, len(Code[i])):
+            for k in Code[i][j]:
+                Unit = audio.generateWave(config.frequency, len(k)*0.25)
+                Wave += Unit
+                Unit = audio.generateWave(0.25)
+                Wave += Unit
+            Unit = audio.generateWave(3*0.25)
+            Wave += Unit
+    
     return Wave 
 
 def audio2morse(Audio):
