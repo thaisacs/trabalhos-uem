@@ -2,6 +2,7 @@ import numpy as np
 from library import config
 
 def generateWave(frequency = 0, time = 0.25):
-    print(time)
+    samples_num = int(time * config.sampling_rate)
+    config.nframes += samples_num
     return [np.sin(2 * np.pi * frequency * x / config.sampling_rate)
-                for x in range(int(config.num_samples*time))]
+                for x in range(samples_num)]

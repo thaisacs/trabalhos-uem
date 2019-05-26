@@ -74,8 +74,6 @@ def morse2audio(Code):
                 Wave += Unit
                 Unit = audio.generateWave(0.25)
                 Wave += Unit
-            Unit = audio.generateWave(3*0.25)
-            Wave += Unit
     
     return Wave 
 
