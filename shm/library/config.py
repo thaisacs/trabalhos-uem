@@ -4,6 +4,6 @@ frequency = 440
 num_samples = 48000 
 sampling_rate = 48000
 amplitude = 16000
-nframes = 0 
+nframes = 960000
 nchannels = 1
 sampwidth = 2

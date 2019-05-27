@@ -3,6 +3,13 @@ from library import config
 
 import matplotlib.pyplot as plt
 
+#fator de correção de tempo
+correction = 1
+ 
+#duracao do som de ponto
+dot_dur = 0.25 * correction
+dash_dur = dot_dur * 3
+
 MorseDict = {'A': '10111', 'B': '111010101', 'C': '11101011101', 
              'D': '1110101', 'E': '1', 'F': '101011101', 'G': '111011101', 
              'H': '1010101', 'I': '101', 'J': '1011101110111', 
@@ -70,12 +77,54 @@ def morse2audio(Code):
     for i in range(0, len(Code)):
         for j in range(0, len(Code[i])):
             for k in Code[i][j]:
-                Unit = audio.generateWave(config.frequency, len(k)*0.25)
-                Wave += Unit
-                Unit = audio.generateWave(0.25)
-                Wave += Unit
+                if(len(k) == 1):
+                    Wave += audio.generateWave(config.frequency, dot_dur)
+                else:
+                    Wave += audio.generateWave(config.frequency, dash_dur)
+                Wave += audio.generateWave(0, dot_dur)
+            Wave += audio.generateWave(0, dash_dur)
+        Wave += audio.generateWave(0, 1.75)
     
     return Wave 
 
 def audio2morse(Audio):
-    print("audio2morse")
+    Resul = ""
+    MorseCode = ""
+    i = 1
+    Size = 0
+    plt.plot(Audio)
+    plt.show()
+    
+    while i < len(Audio):
+        if(Audio[i] != 0):
+            Resul += '1'
+            while(Audio[i] != 0):
+                i += 1
+        else:
+            Resul += str(Audio[i])
+        i += 1
+    
+    for i in range(0, len(Resul)):
+        if(Resul[i] == '0'):
+            Size += 1
+            if(i < len(Resul) - 1 and Resul[i+1] != Resul[i]):
+                print(Size)
+                if(Size == 1200):
+                    MorseCode += "00"
+                elif(Size == 48000):
+                    MorseCode += "00"
+                elif(Size == 132000):
+                    MorseCode += "000000"
+                Size = 0
+        else:
+            Size += 1
+            if(i < len(Resul) - 1 and Resul[i+1] != Resul[i]):
+                if(Size == 20):
+                    MorseCode += "0"
+                    MorseCode += "1"
+                else:
+                    MorseCode += "0"
+                    MorseCode += "111"
+                Size = 0
+    
+    return MorseCode

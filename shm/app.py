@@ -17,13 +17,17 @@ def main():
         file.writeMorseFile("code.morse", MorseCode)
         file.writeAudioFile("audio.wav", Wav)
     elif(FileType == input.Type.WAV):
-        print("error")
-        #audio2text()
-        #audio2morse()
+        Audio = file.openAudioFile("audio.wav")
+        MorseCode = translator.audio2morse(Audio)
+        Text = translator.morse2text(MorseCode)
+        file.writeMorseFile("code.morse", MorseCode)
+        file.writeTextFile("text.txt", Text)
     elif(FileType == input.Type.MORSE):
-        Code = file.readTextFile(FileName) 
-        Text = translator.morse2text(Code)
-        #morse2audio()
+        MorseCode = file.readTextFile(FileName) 
+        Text = translator.morse2text(MorseCode)
+        Wav = translator.morse2audio(MorseCode)
+        file.writeAudioFile("audio.wav", Wav)
+        file.writeTextFile("text.txt", Text)
     else:
         print("error")
 
