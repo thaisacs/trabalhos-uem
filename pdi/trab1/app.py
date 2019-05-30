@@ -91,15 +91,15 @@ def calculateRange(bucket, band):
     return color_max - color_min
 
 def createBucket(r, g, b):
-    Bucket = []
+    bucket = []
     
     for i in range(0, len(r)):
         for j in range(0, len(r[i])):
-            Bucket.append({'r': r[i][j], 'g': g[i][j], 'b': b[i][j]})
+            bucket.append({'r': r[i][j], 'g': g[i][j], 'b': b[i][j]})
     
-    return Bucket
+    return bucket
 
-def applyColors(img_in, Colors):
+def applyColors(img_in, colors):
     r,g,b = cv2.split(img_in)
    
     new_r = np.zeros(len(r))
@@ -108,16 +108,16 @@ def applyColors(img_in, Colors):
 
     for i in range(0, len(r)):
         for j in range(0, len(r[i])):
-            Distance = np.zeros(len(Colors))
+            distances = np.zeros(len(colors))
+            pixel = ((r[i][j], g[i][j], b[i][j]))
             for k in range(0, len(Colors)):
-                pixel = ((r[i][j], g[i][j], b[i][j]))
-                color = ((Colors[k]['r'], Colors[k]['g'], Colors[k]['b']))
-                Distance[k] = distance.euclidean(pixel, color)
-            Min = Distance.min()
-            k, = np.where(Distance == Min)
-            r[i][j] = Colors[k[0]]['r']
-            g[i][j] = Colors[k[0]]['g']
-            b[i][j] = Colors[k[0]]['b']
+                color = ((colors[k]['r'], colors[k]['g'], colors[k]['b']))
+                distances[k] = distance.euclidean(pixel, color)
+            dist_min = distances.min()
+            k, = np.where(distances == dist_min)
+            r[i][j] = colors[k[0]]['r']
+            g[i][j] = colors[k[0]]['g']
+            b[i][j] = colors[k[0]]['b']
 
     return cv2.merge([r,g,b])
 
