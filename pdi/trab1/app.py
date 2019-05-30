@@ -110,7 +110,7 @@ def applyColors(img_in, colors):
         for j in range(0, len(r[i])):
             distances = np.zeros(len(colors))
             pixel = ((r[i][j], g[i][j], b[i][j]))
-            for k in range(0, len(Colors)):
+            for k in range(0, len(colors)):
                 color = ((colors[k]['r'], colors[k]['g'], colors[k]['b']))
                 distances[k] = distance.euclidean(pixel, color)
             dist_min = distances.min()
@@ -125,16 +125,16 @@ def cut(buckets):
     new_buckets = []
 
     for bucket in buckets:
-        rRange = calculateRange(bucket, 'r')
-        gRange = calculateRange(bucket, 'g')
-        bRange = calculateRange(bucket, 'b')
+        r_range = calculateRange(bucket, 'r')
+        g_range = calculateRange(bucket, 'g')
+        b_range = calculateRange(bucket, 'b')
         
         B1 = []
         B2 = []
 
-        if(rRange > gRange and rRange > bRange):
+        if(r_range > g_range and r_range > b_range):
             bucket = sorted(bucket, key = lambda i: i['r'])
-        elif(gRange > rRange and gRange > bRange):
+        elif(g_range > r_range and g_range > b_range):
             bucket = sorted(bucket, key = lambda i: i['g'])
         else:
             bucket = sorted(bucket, key = lambda i: i['b'])
