@@ -9,29 +9,28 @@ Created on Fri May 17 17:36:24 2019
 
 import numpy as np
 import cv2
+from scipy.spatial import distance
 
-imgName = 'images/strawberries_fullcolor.tif'
-n = 4 
-mode = 1
+img_name = 'images/daith2.jpg'
+n = 16 
+mode = 2
 # 1: Uniform
 # 2: Median Cut
-
-def readSG(name): # read shades of gray image
-    return cv2.imread(name, 0)
 
 def readRGB(name):
     bgr_img = cv2.imread(name)
     b,g,r = cv2.split(bgr_img)
     return cv2.merge([r,g,b])
 
-def show(label, img):
-    cv2.imshow(label, img)
-    
 def showRGB(label, img):
     r,g,b = cv2.split(img)
     cv2.imshow(label, cv2.merge([b,g,r]))
 
-#### UNIFORM QUANTIZATION ####
+def writeRGB(name, img):
+    r,g,b = cv2.split(img)
+    cv2.imwrite(name, cv2.merge([b,g,r]))
+
+#### UNIFORM ####
 
 def splitCube(n):
     for i in range(n-1, 0, -1):
@@ -47,20 +46,10 @@ def createLUT(n):
     LUT = np.zeros(256)
 
     for i in range(0, 256):
-        a = abs(colors - i)
-        m = a.min()
-        k, = np.where(a == m)
-        LUT[i] = colors[k[0]]
-
-    return LUT
-
-def createLUTv2(colors):
-    LUT = np.zeros(256)
-    for i in range(0, 256):
-        a = abs(colors - i)
-        m = a.min()
-        k, = np.where(a == m)
-        LUT[i] = colors[k[0]]
+        distances = abs(colors - i)
+        min_dist = distances.min()
+        index_dist, = np.where(distances == min_dist)
+        LUT[i] = colors[index_dist[0]]
 
     return LUT
 
@@ -76,30 +65,30 @@ def uniform(img_in, n):
 
 #### MEDIAN CUT ####
 
-def calculateRange(Bucket, Band):
-    Max = 0
-    Min = 10000
+def calculateRange(bucket, band):
+    color_max = 0
+    color_min = 255 
     
-    if(Band == 'r'):
-        for i in Bucket:
-            if i['r'] < Min:
-                Min = i['r']
-            if i['r'] > Max:
-                Max = i['r']
-    elif(Band == 'g'):
-        for i in Bucket:
-            if i['g'] < Min:
-                Min = i['g']
-            if i['g'] > Max:
-                Max = i['g']
+    if(band == 'r'):
+        for i in bucket:
+            if i['r'] < color_min:
+                color_min = i['r']
+            if i['r'] > color_max:
+                color_max = i['r']
+    elif(band == 'g'):
+        for i in bucket:
+            if i['g'] < color_min:
+                color_min = i['g']
+            if i['g'] > color_max:
+                color_max = i['g']
     else:
-        for i in Bucket:
-            if i['b'] < Min:
-                Min = i['b']
-            if i['b'] > Max:
-                Max = i['b']
+        for i in bucket:
+            if i['b'] < color_min:
+                color_min = i['b']
+            if i['b'] > color_max:
+                color_max = i['b']
     
-    return Max - Min
+    return color_max - color_min
 
 def createBucket(r, g, b):
     Bucket = []
@@ -110,86 +99,92 @@ def createBucket(r, g, b):
     
     return Bucket
 
-def cut(Buckets):
-    NewBuckets = []
+def applyColors(img_in, Colors):
+    r,g,b = cv2.split(img_in)
+   
+    new_r = np.zeros(len(r))
+    new_g = np.zeros(len(g))
+    new_b = np.zeros(len(b))
 
-    for B in Buckets:
-        rRange = calculateRange(B, 'r')
-        gRange = calculateRange(B, 'g')
-        bRange = calculateRange(B, 'b')
+    for i in range(0, len(r)):
+        for j in range(0, len(r[i])):
+            Distance = np.zeros(len(Colors))
+            for k in range(0, len(Colors)):
+                pixel = ((r[i][j], g[i][j], b[i][j]))
+                color = ((Colors[k]['r'], Colors[k]['g'], Colors[k]['b']))
+                Distance[k] = distance.euclidean(pixel, color)
+            Min = Distance.min()
+            k, = np.where(Distance == Min)
+            r[i][j] = Colors[k[0]]['r']
+            g[i][j] = Colors[k[0]]['g']
+            b[i][j] = Colors[k[0]]['b']
+
+    return cv2.merge([r,g,b])
+
+def cut(buckets):
+    new_buckets = []
+
+    for bucket in buckets:
+        rRange = calculateRange(bucket, 'r')
+        gRange = calculateRange(bucket, 'g')
+        bRange = calculateRange(bucket, 'b')
         
         B1 = []
         B2 = []
 
         if(rRange > gRange and rRange > bRange):
-            B = sorted(B, key = lambda i: i['r'])
+            bucket = sorted(bucket, key = lambda i: i['r'])
         elif(gRange > rRange and gRange > bRange):
-            B = sorted(B, key = lambda i: i['g'])
+            bucket = sorted(bucket, key = lambda i: i['g'])
         else:
-            B = sorted(B, key = lambda i: i['b'])
+            bucket = sorted(bucket, key = lambda i: i['b'])
         
-        for i in range(0, len(B)):
-            if i < len(B)/2:
-                B1.append(B[i])
+        for i in range(0, len(bucket)):
+            if i < len(bucket)/2:
+                B1.append(bucket[i])
             else:
-                B2.append(B[i])
+                B2.append(bucket[i])
 
-        NewBuckets.append(B1)
-        NewBuckets.append(B2)
+        new_buckets.append(B1)
+        new_buckets.append(B2)
 
-    return NewBuckets
+    return new_buckets
 
 def medianCut(img_in, n):
     r,g,b = cv2.split(img_in)
     
-    Buckets = []
-    Buckets.append(createBucket(r, g, b))
+    buckets = []
+    buckets.append(createBucket(r, g, b))
     
     i = 1
     while i < n:
-        Buckets = cut(Buckets)
+        buckets = cut(buckets)
         i = 2*i
+    
+    colors = []
 
-    ResulR = []
-    ResulG = []
-    ResulB = []
-
-    for B in Buckets:
+    for bucket in buckets:
         rB = []
         gB = []
         bB = []
-        for i in B:
+        
+        for i in bucket:
             rB.append(i['r'])
             gB.append(i['g'])
             bB.append(i['b'])
-        ResulR.append(int(np.mean(rB)))
-        ResulB.append(int(np.mean(gB)))
-        ResulG.append(int(np.mean(rB)))
-
-    ResulR = np.asarray(ResulR, dtype = np.int)
-    ResulB = np.asarray(ResulB, dtype = np.int)
-    ResulG = np.asarray(ResulG, dtype = np.int)
-
-    r[:] = (createLUTv2(ResulR))[r[:]]
-    g[:] = (createLUTv2(ResulG))[g[:]]
-    b[:] = (createLUTv2(ResulB))[b[:]]
+        
+        colors.append({'r': int(np.mean(rB)), 'g': int(np.mean(gB)), 'b': int(np.mean(bB))})
     
-    #return img_in
-    return cv2.merge([r,g,b])
+    return applyColors(img_in, colors)
 
 def main():
-    img_in = readRGB(imgName)
-    img = img_in.copy()
+    img_in = readRGB(img_name)
     
     if(mode == 1):
-        img_out = uniform(img, n);
+        img_out = uniform(img_in, n);
     else:
-        img_out = medianCut(img, n);
+        img_out = medianCut(img_in, n);
     
-    showRGB('image in', img_in)
-    showRGB('image out', img_out)
-    
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    writeRGB('out.jpg', img_out)
 
 main()
