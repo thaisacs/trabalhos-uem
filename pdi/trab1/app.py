@@ -11,8 +11,8 @@ import numpy as np
 import cv2
 from scipy.spatial import distance
 
-img_name = 'images/abstrata.jpg'
-n = 32 
+img_name = 'images/rgb2.jpeg'
+n = 8 
 mode = 1
 # 1: Uniform
 # 2: Median Cut
