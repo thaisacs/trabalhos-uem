@@ -34,13 +34,28 @@ def writeRGB(name, img):
 #### UNIFORM ####
 
 def splitCube(n):
-    for i in range(n-1, 0, -1):
-        for j in range(n-1, 0, -1):
-            for k in range(n-1, 0, -1):
-                if(i*j*k == n):
-                    return i, j, k
+    divisor = 2
+    fatores = []
+    while(n != 1):
+        if(n % divisor == 0):
+            fatores.append(divisor)
+            n = n / divisor
+        else:
+            divisor += 1
+
+    #insere 1 nos fatores caso nao tenha 3 fatores
+    while(len(fatores) < 3):
+        fatores.append(1)
     
-    return 4,3,2
+    while(len(fatores) > 3):
+        min1 = min(fatores)
+        fatores.remove(min1)
+        min2 = min(fatores)
+        fatores.remove(min2)
+        novoMin = min1 * min2
+        fatores.append(novoMin)
+
+    return fatores[0], fatores[1], fatores[2]
 
 def createLUT(n):
     colors = np.linspace(0, 255, n, dtype=np.int)
