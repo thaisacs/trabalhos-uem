@@ -10,9 +10,10 @@ Created on Fri May 17 17:36:24 2019
 import numpy as np
 import cv2
 from scipy.spatial import distance
+import matplotlib.pyplot as plt
 
-img_name = 'images/daith2.jpg'
-n = 16 
+img_name = 'images/rgb2.jpeg'
+n = 8 
 mode = 2
 # 1: Uniform
 # 2: Median Cut
@@ -118,6 +119,9 @@ def applyColors(img_in, colors):
             r[i][j] = colors[k[0]]['r']
             g[i][j] = colors[k[0]]['g']
             b[i][j] = colors[k[0]]['b']
+    
+    plt.hist(g.ravel(), 256, [0,256])
+    plt.show()
 
     return cv2.merge([r,g,b])
 
