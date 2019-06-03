@@ -13,10 +13,11 @@ from scipy.spatial import distance
 import matplotlib.pyplot as plt
 from operator import itemgetter
 import sys
+from math import sqrt
 
 img_name = 'images/daith2.jpg'
 n = 128 
-mode = 2
+mode = 1
 # 1: Uniform
 # 2: Median Cut
 
@@ -72,12 +73,12 @@ def create_LUT(n):
     return LUT
 
 def uniform(img_in, n):
-    x,y,z = splitCube(n)
+    x,y,z = split_cube(n)
     r,g,b = cv2.split(img_in)
     
-    r[:] = (createLUT(x))[r[:]]
-    g[:] = (createLUT(y))[g[:]]
-    b[:] = (createLUT(z))[b[:]]
+    r[:] = (create_LUT(x))[r[:]]
+    g[:] = (create_LUT(y))[g[:]]
+    b[:] = (create_LUT(z))[b[:]]
 
     return cv2.merge([r,g,b])
 
@@ -112,6 +113,9 @@ def create_bucket(r, g, b):
     
     return bucket
 
+def calculate_distance(pixel, color):
+    return sqrt((int(pixel[0])-int(color[0]))**2 + (int(pixel[1])-int(color[1]))**2 + (int(pixel[2])-int(color[2]))**2)
+
 def apply_colors(img_in, colors):
     r,g,b = cv2.split(img_in)
    
@@ -121,13 +125,12 @@ def apply_colors(img_in, colors):
             distances = np.zeros(len(colors))
             pixel = np.array([r[i][j], g[i][j], b[i][j]])
             for color in colors:
-                distances[index_dis] = distance.euclidean(pixel, color)
+                distances[index_dis] = calculate_distance(pixel, color)
                 index_dis += 1
-            dist_min = np.min(distances)
-            k, = np.where(distances == dist_min)
-            r[i][j] = colors[k[0]][0]
-            g[i][j] = colors[k[0]][1]
-            b[i][j] = colors[k[0]][2]
+            k = np.argmin(distances)
+            r[i][j] = colors[k][0]
+            g[i][j] = colors[k][1]
+            b[i][j] = colors[k][2]
     
     return cv2.merge([r,g,b])
 
@@ -139,9 +142,9 @@ def cut(buckets):
         g_range = calculate_range(bucket, 'g')
         b_range = calculate_range(bucket, 'b')
         
-        if(r_range > g_range and r_range > b_range):
+        if(r_range >= g_range and r_range >= b_range):
             bucket = sorted(bucket, key=itemgetter(0))
-        elif(g_range > r_range and g_range > b_range):
+        elif(g_range >= r_range and g_range >= b_range):
             bucket = sorted(bucket, key=itemgetter(1))
         else:
             bucket = sorted(bucket, key=itemgetter(2))
@@ -198,7 +201,6 @@ def median_cut(img_in, n):
         colors[index_c][2] = np.mean(bB)
         index_c += 1
     
-    print(colors)
     return apply_colors(img_in, colors)
 
 def main():
