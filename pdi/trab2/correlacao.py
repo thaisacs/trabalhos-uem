@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 #abre imagem em tons de cinza
-img_in = cv2.imread("images/daith1.jpg",0)
+img_in = cv2.imread("images/strawberries_fullcolor.jpg",0)
 
 #definicao do tipo da mascara
 tipo = 1
@@ -19,7 +19,7 @@ if tipo == 0:
 elif tipo == 1:
     mascara = np.array([[1,1,1],[1,1,1],[1,1,1]],dtype=np.uint8) / 9 #centro: [1][1]
 elif tipo == 2:
-    mascara = np.array([[1,2,1],[2,4,2],[1,2,1]],dtype=np.uint8) #centro: [1][1]
+    mascara = np.array([[1,2,1],[2,4,2],[1,2,1]],dtype=np.uint8) / 16 #centro: [1][1]
 elif tipo == 3:
     mascara = np.array([[-1,-1,-1],[0,0,0],[1,1,1]],dtype=np.uint8) #centro: [1][1]
 elif tipo == 4:
