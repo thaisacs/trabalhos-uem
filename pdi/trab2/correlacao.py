@@ -2,10 +2,10 @@ import numpy as np
 import cv2
 
 #abre imagem em tons de cinza
-img_in = cv2.imread("images/abstrata.jpg",0)
+img_in = cv2.imread("images/polygons.jpg",0)
 
 #definicao do tipo da mascara
-tipo = 0
+tipo = 3
 
 #TIPO:
 #0: mascara identidade
@@ -15,7 +15,7 @@ tipo = 0
 #4: borda vertical
 
 #definicao do algoritmo
-algoritmo = 1
+algoritmo = 0
 
 #ALGORITMO
 #0: correlacao por translacao
@@ -43,7 +43,7 @@ def correlacao_translacao(imagem): ##### METODO TRANSLACAO #####
     img[1:altura+1,1:largura+1] = imagem
 
     #TRANSLACOES
-    corr = np.zeros((altura,largura), dtype=np.uint8)
+    corr = np.zeros((altura,largura), dtype=np.int8)
     for i in range(3):
         for j in range(3):
             crop = img[i:altura+i,j:largura+j]
@@ -65,7 +65,7 @@ def correlacao_for_ij(imagem): ##### METODO FOR i FOR j
     img[1:altura+1,1:largura+1] = imagem
 
     #criar correlacao de zeros
-    corr = np.zeros((altura,largura), dtype=np.uint8)
+    corr = np.zeros((altura,largura), dtype=np.int8)
 
     #varre a imagem com for i for j
     for i in range(altura):
