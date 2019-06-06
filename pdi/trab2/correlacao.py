@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 #abre imagem em tons de cinza
-img_in = cv2.imread("images/cameraman.tif",0)
+img_in = cv2.imread("images/paredeTijolos.jpg",0)
 
 #definicao do tipo da mascara
 tipo = 3
