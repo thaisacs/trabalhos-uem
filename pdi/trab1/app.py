@@ -11,10 +11,11 @@ import numpy as np
 import cv2
 from scipy.spatial import distance
 import matplotlib.pyplot as plt
+import math
 
-img_name = 'images/rgb2.jpeg'
-n = 8 
-mode = 2
+img_name = 'images/strawberries_fullcolor.jpg'
+n = 256 
+mode = 1
 # 1: Uniform
 # 2: Median Cut
 
@@ -196,6 +197,14 @@ def medianCut(img_in, n):
     
     return applyColors(img_in, colors)
 
+def psnr(img1, img2):
+    mse = np.mean((img1 - img2) ** 2)
+    if mse == 0:
+        return 100
+    pixel_max = 255.0
+
+    return 20 * math.log10(pixel_max/math.sqrt(mse))
+
 def main():
     img_in = readRGB(img_name)
     
@@ -203,7 +212,8 @@ def main():
         img_out = uniform(img_in, n);
     else:
         img_out = medianCut(img_in, n);
-    
+    d = psnr(img_in,img_out)
+    print(d)
     writeRGB('out.jpg', img_out)
 
 main()
