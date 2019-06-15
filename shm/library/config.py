@@ -7,6 +7,6 @@ amplitude = 16000
 nframes = 0 
 nchannels = 1
 sampwidth = 2
-dot_dur = 0.25
+dot_dur = 0.25*1
 dash_dur = dot_dur*3
 space_dur = dot_dur*7

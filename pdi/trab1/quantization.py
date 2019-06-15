@@ -16,8 +16,8 @@ import sys
 from math import sqrt
 
 img_name = 'images/daith2.jpg'
-n = 128 
-mode = 1
+n = 2 
+mode = 2
 # 1: Uniform
 # 2: Median Cut
 
@@ -74,6 +74,9 @@ def create_LUT(n):
 
 def uniform(img_in, n):
     x,y,z = split_cube(n)
+    print(x)
+    print(y)
+    print(z)
     r,g,b = cv2.split(img_in)
     
     r[:] = (create_LUT(x))[r[:]]
@@ -211,6 +214,6 @@ def main():
     else:
         img_out = median_cut(img_in, n);
     
-    write_rgb('out.jpg', img_out)
+    write_rgb(str(n)+'.jpg', img_out)
 
 main()

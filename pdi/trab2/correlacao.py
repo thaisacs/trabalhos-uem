@@ -5,7 +5,7 @@ import cv2
 img_in = cv2.imread("images/paredeTijolos.jpg",0)
 
 #definicao do tipo da mascara
-tipo = 3
+tipo = 4
 
 #TIPO:
 #0: mascara identidade
