@@ -1,0 +1,153 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+
+\usepackage{graphicx,url}
+
+\usepackage[brazil]{babel}   
+\usepackage[utf8]{inputenc}
+
+     
+\sloppy
+
+\title{Previsão de desvio dinâmica}
+
+\author{Rafael Rodrigues dos Santos\inst{1}, Thais Aparecida Silva Camacho\inst{1}}
+
+
+\address{Departamento de Informática -- Universidade Estadual de Maringá
+  (UEM)
+  \email{rafael11rodrigues@hotmail.com, thaiscamachoo@gmail.com}
+}
+
+
+\usepackage{cite}
+
+\begin{document}
+\maketitle
+
+\section{Introdução}
+
+Um dos maiores desafios no projeto de processadores que suportam a execução de múltiplas instruções simultaneamente é minimizar o tempo em que partes do
+processador não são usadas, visto que instruções dependentes não podem ser executadas em paralelo, o que faz essas instruções ficarem paradas até que as
+dependências sejam resolvidas.
+
+Um dos tipos de dependência bastante problemático é o de dependência procedural, que diz respeito às instruções de desvio. Quando existe um salto condicional, a
+execução do programa pode ou não ser desviada para um outro ponto, quebrando o fluxo sequencial. Se o salto ocorre, as instruções imediatamente subsequentes à
+instrução de desvio não devem ser executadas. Todavia, é apenas na execução que se descobre se o salto deve ou não ser tomado e, até chegar nesse ponto,
+algumas instruções podem ter sido executadas indevidamente e o processador precisa retomar ao ponto correto da execução.
+
+Uma vez que essa retomada custa caro em termos de tempo e processamento, é preciso adotar medidas que possam deduzir se um desvio será tomado ou não, pois com
+essa informação é possível impedir que instruções indevidas sejam executadas. Tais medidas são denominadas de previsão de desvio e são divididas em previsão
+estática e dinâmica, cada categoria tendo suas vantagens e desvantagens. Este documento abordará os algoritmos de previsão dinâmica, trazendo algumas características
+ dos algoritmos mais utilizados e comparando a eficiência de cada um, além de apresentar alguns aspectos da implementação de previsão de desvio no processador
+ UltraSPARC I.
+
+\section{Fundamentação Teórica}
+
+Quando existe uma instrução de desvio em um programa, duas operações devem ser feitas: o cálculo do endereço da instrução para a qual o programa será desviado e
+a avaliação dos operadores que determinam se o salto será tomado ou não. Ambas ocorrem apenas na execução, isto é, por mais que a etapa da decodificação
+identifique que se trata de um salto condicional, ainda não é possível dizer se o salto deve ser tomado.
+
+  Enquanto não se sabe o que deve ser feito, duas situações podem ocorrer com relação às instruções subsequentes: elas podem gastar alguns ciclos de clock
+  esperando a decisão do desvio\cite{schemes} ou elas podem ser buscadas e executadas. No segundo caso, se for definido que o desvio deve ser tomado, as
+  instruções subsequentes não deveriam ter sido executadas e o processador gasta ainda mais ciclos limpando essas instruções indevidas\cite{smith}. De qualquer
+  forma, há uma queda no grau de paralelismo e principalmente de desempenho do processador.
+  
+  Os algoritmos de previsão de desvio tentam contornar esse problema, ou seja, a cada instrução de desvio identificada eles tentam direcionar a execução do
+  programa para as instruções com maiores chances de realmente serem executadas posteriormente. Tais algoritmos podem ser estáticos ou dinâmicos, sendo que os
+  dinâmicos apresentam maiores taxas de acerto\cite{schemes} por utilizarem dados da execução de cada programa em vez de definir uma dada política antes da
+  execução.
+  
+  As estratégias de previsão de desvio dinâmica são subdivididas em duas categorias, as quais serão brevemente explicadas a seguir. 
+  
+  \subsection{Previsão de desvio de 1 nível}
+  
+  Esse tipo de previsão de desvio se baseia em apenas uma informação do histórico de previsão: se os desvios foram tomados ou não. Geralmente são implementados
+  por contadores ou por uma tabela de previsão de desvios.
+  
+  Um contador é incrementado quando um desvio é tomado e decrementado caso contrário. A forma mais simples é usar um contador de 1 bit, que prevê que o desvio
+  não será tomado quando está em 0 e que será tomado quando está em 1. Contudo, essa estratégia erra em dois momentos: na primeira iteração de um laço de
+  repetição (usualmente ao menos uma iteração é feita) e na última iteração (o desvio para uma nova iteração certamente não é tomado).
+  
+  A implementação mais comum é a de contadores de dois bits, que assume valores de 0 a 3. O bit mais significativo é o responsável pela predição (análogo ao
+  contador de 1 bit). Assim, se em um dado momento o contador está em 11 (previsão de que o desvio será tomado), é preciso errar duas vezes para que o
+  processador passe a prever que o desvio não será tomado. Desta forma, por mais que a previsão erre na última iteração de um laço, a previsão na primeira
+  iteração do próximo laço certamente será correta.
+  
+  A tabela (ou buffer) de previsão de desvio -- também conhecida como previsão bimodal -- é uma estrutura que associa uma previsão de desvio para cada instrução
+  de desvio executada. Isso é feito mapeando alguns dos bits menos significativos do endereço das instruções de desvio para um conjunto de bits de
+  previsão (normalmente contadores de dois bits).
+  
+  Um cuidado que se deve ter é com relação ao número de bits usados no mapeamento, pois eles determinam o tamanho da tabela. Tabelas muito grandes podem ocupar
+  espaços desnecessários, mas tabelas muito pequenas permitem que duas instruções possam ser mapeadas para um mesmo conjunto de bits de previsão, fenômeno
+  conhecido como aliasing e que nem sempre tem efeito negativo\cite{benlee}.
+  
+  \subsection{Previsão de desvio de 2 níveis}
+  
+  Em vez de verificar apenas se um dado desvio foi tomado ou não anteriormente, a previsão de dois níveis analisa padrões de desvio presentes no programa em
+  execução e os armazena em uma tabela de histórico de previsão. Várias foram as propostas de implementação, dentre elas o histórico local, histórico global,
+  previsão global com seleção de índice e previsão global com índice compartilhado. Todas essas formas de previsão são chamadas de previsão
+  correlacionada\cite{schemes}, pois se baseiam no comportamento conjunto das n instruções mais recentes.
+  
+  O histórico local considera duas tabelas. A primeira mapeia alguns dos bits menos significativos dos endereços das instruções de desvio para um conjunto de n
+  bits que representam o padrão das n execuções mais recentes da instrução. Cada padrão é mapeado em uma segunda tabela, a qual indica se o desvio deve ser
+  tomado ou não quando um padrão de desvios se repetir. Esta segunda tabela, chamada de tabela local, pode utilizar apenas 1 bit para indicar a
+  decisão\cite{yehpatt} ou um contador de dois bits\cite{smith}, análogo à previsão bimodal.
+  
+  O histórico global é semelhante ao histórico local, porém substitui a primeira tabela por um registrador de deslocamento de n bits que armazena o resultado
+  das últimas n instruções de desvio sem distinção. Isso permite prever desvios que dependam de outros desvios, já que os padrões são
+  formados por todas as instruções de desvio do programa\cite{mcfarling}. Por outro lado, essa estratégia não permite identificar sobre qual instrução a
+  previsão está sendo feita.
+  
+ Para resolver a perda de identidade de instruções trazida pelo histórico global, é possível usar a previsão global por seleção (gselect) ou por
+ compartilhamento (gshare).
+ Ambas as técnicas combinam os bits do histórico global com os bits de endereço da instrução de desvio. A primeira concatena alguns dos bits menos significativos de
+ ambos os conjuntos de bits, e a segunda realiza uma operação ``ou exclusiva'' (XOR) bit a bit entre os conjuntos. A vantagem da gshare sobre a gselect é que
+ nesta última apenas alguns dos bits de endereço da instrução são usadas, sendo mais difícil identificar a instrução\cite{schemes}, visto que pode haver outras
+ instruções e outros padrões de histórico global que formem a mesma sequência de bits.
+
+\subsection{Previsão combinada}
+
+Uma vez que cada técnica de previsão de desvio tira vantagem de observações diferentes da execução dos programas, é possível criar novas formas de previsão
+combinando duas técnicas distintas. Isso pode ser feito por meio de uma tabela de contadores de dois bits que, para cada entrada (parte de endereços de
+instruções de desvios ou bits de padrões), o contador correspondente seleciona qual das duas técnicas deve ser usada \cite{mcfarling}. O valor do contador depende dos acertos
+e erros das duas técnicas. Se ambas as previsões erram ou acertam, o valor não é alterado; se apenas a segunda acerta, o contador é decrementado; e se apenas a
+primeira acerta, o contador é incrementado.
+
+Uma boa combinação de previsores de desvio é usar a técnica bimodal e a gshare \cite{mcfarling}, com a qual foi possível aumentar em até três vezes a taxa de
+acerto de previsão nos testes feitos por McFarling utilizando o conjunto de programas SPEC'89 Benchmarks.
+
+\section{Implementação}
+  
+  O UltraSPARC I é um processador da família UltraSPARC desenvolvida pela Sun Microsystems iniciada em 1994. Utiliza-se de uma arquitetura RISC
+  superescalar com pipeline reduzido (miniestágio).
+  
+  A técnica de previsão de desvio empregada pelo UltraSPARC é a bimodal, utilizando dois bits a cada duas instruções de desvio na memória cache de instruções
+  (I-cache).
+  A tabela de previsão de desvio guarda até 2048 entradas (contadores de 2 bits), o que é bem mais que o necessário pela maioria dos programas. Os contadores
+  das instruções de desvio da I-cache são inicializados estaticamente com 01 ou 10 e, conforme elas são executadas, os bits são alterados de acordo com o que foi explicado anteriormente na previsão de 1 nível.
+  
+  \section{Conclusão}
+  
+  Independente do grau de paralelismo oferecido por um processador superescalar, é impossível utilizar toda sua capacidade o tempo todo, pois além de alguns
+  ciclos de clock serem gastos esperando que dependências de dados sejam resolvidas, saltos condicionais também reduzem o seu desempenho por criarem dois
+  possíveis fluxos de execução, sendo que um deles é executado indevidamente. As técnicas de previsão de desvio tentam garantir que apenas o fluxo correto seja
+  executado. Existem diversas formas de fazer essa previsão, cada uma com suas vantagens e desvantagens. 
+  
+  Técnicas de previsão dinâmica são mais eficientes que técnicas de previsão estática, já que utilizam informações obtidas conforme as instruções vão sendo
+  executadas em vez de predefinir um comportamento padrão. Um histórico das instruções de desvio é armazenado e, com base nele,o comportamento das próximas
+  ocorrências desses desvios é previsto. Entende-se por próximas ocorrências a repetição de uma instrução específica ou de um padrão de desvios atrelado a um
+  conjunto de instruções.
+  
+  Antes de começar a organizar o histórico de desvios -- o qual pode ser implementado de várias maneiras -- é preciso adotar uma técnica de previsão estática
+  para a primeira ocorrência de uma instrução de desvio ou de um padrão de desvios. No caso do processador UltraSPARC I, que utiliza uma previsão dinâmica por
+  meio de um contador de dois bits, é possível assumir estaticamente que na primeira ocorrência de uma instrução de desvio o salto é tomado (contador
+  iniciado em 10) ou não tomado (contador iniciado em 01) e, a partir do resultado da primeira ocorrência, o valor do contador é alterado dinamicamente conforme as instruções são
+  repetidas.
+  
+  \nocite{ultrasparc1}
+  \nocite{loadstore}
+  \bibliographystyle{sbc}
+  \bibliography{referencias}
+\end{document}

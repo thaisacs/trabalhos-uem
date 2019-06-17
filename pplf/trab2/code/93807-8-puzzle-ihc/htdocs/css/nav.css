@@ -1,0 +1,16 @@
+.nav-link {
+  text-decoration: none;
+}
+
+.navbar-nav {
+  float: right;
+  margin: 12px 135px 0 0;
+}
+
+ul {
+  list-style-type: none;
+}
+
+#conteudo {
+  margin-top: 100px;
+}

@@ -1,0 +1,120 @@
+\documentclass[12pt]{article}
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[brazil]{babel}   
+%\usepackage[latin1]{inputenc}  
+\usepackage[utf8]{inputenc}  
+% UTF-8 encoding is recommended by ShareLaTex
+\sloppy
+\title{Predição de Desvio Estática}
+\author{Rafael Rodrigues dos Santos\inst{1}, Thais Aparecida Silva Camacho\inst{1}}
+
+\address{
+  Departamento de Informática\\
+  Universidade Estadual de Maringá -- Maringá, PR -- Brazil
+  \email{rafael11rodrigues@hotmail.com, thaiscamachoo@gmail.com}
+}
+
+\begin{document} 
+
+\maketitle
+
+\section{Introdução}
+
+Na busca de obter um melhor desempenho, processadores empregam algumas abordagens para exploração do paralelismo. Nesse contexto encontram-se arquiteturas superescalares e o pipeline. 
+
+Um dos problemas que afetam o desempenho do pipeline é comumente conhecido como hazards de controle. Tal problema acontece quando  o pipeline se depara com uma
+instrução de desvio, neste caso ele deve decidir se o desvio será tomado ou não. Caso o pipeline tome a decisão errada, vão existir instruções dentro do
+pipeline que precisam ser descartadas logo em seguida. Consequentemente, ocorre uma perda de alguns ciclos com a remoção, o redirecionamento do fluxo e o preenchimento dos estágios iniciais.
+
+Dessa maneira, tem-se a predição de desvio que é o processo de antecipar se uma determinada instrução é de desvio e determinar, antes da sua fase de execução,
+se o desvio será tomado ou não. Aumentando-se significativamente o desempenho de arquiteturas pipeline e processadores superescalares.
+
+Existem várias técnicas de predição de desvio, tanto técnicas estáticas implementadas em software como técnicas estáticas e dinâmicas implementada hardware. O
+objetivo deste artigo é descrever as nossas descobertas referentes as técnicas estáticas.
+
+\section{Fundamentação Teórica} \label{sec:firstpage}
+
+Existem quatro situações envolvendo desvios,
+
+\begin{itemize}
+	\item chamada de subrotinas;
+	\item retorno de subrotinas;
+	\item desvios incondicionais;
+	\item desvios condicionais;
+\end{itemize}
+
+Os três primeiros itens sempre alteram o fluxo de controle do programa. Já o último item, desvios condicionais, os processadores devem verificar alguma condição antes de tomarem a decisão de qual fluxo seguir.
+
+Em média em um programa, encontra-se entre 65\% e 80\% de desvios condicionais e os desvios de subrotinas e incondicionais são em torno de 10\% a 20\% cada.
+
+Dessa forma, na tentativa de aumentar o paralelismo, muitos autores propõem técnicas para prever o fluxo de um desvio. Utilizando-se desta previsão, as instruções pertencentes ao fluxo com maior probabilidade de execução são buscadas, decodificadas e executada antecipadamente. No entanto, devesse ter mecanismos para desfazer eventuais previsões erradas. Tais técnicas são apresentadas a seguir.
+
+\subsection{Técnicas de Predição em Software}
+
+As técnicas de predição em software são estáticas e empregadas durante a compilação do programa, sendo que é cargo do software reorganizar suas instruções indicando quais serão executados em paralelo com a instrução de desvio.
+
+\subsubsection{Dalayed Branch}
+
+A técnica Dalayed Branch, segundo \cite{predicaoDaltio} consiste em reorganizar as instruções do programa, mantendo sua equivalência semântica e minimizando os retardos causados pelos desvios. Dessa forma, o compilador tenta movimentar as intruções do programa, alocando-as logo depois da instrução de desvio. 
+
+O ciclo de execução de um desvio com atraso de uma unidade pode ser decrito pelo seguintes passos:
+
+\begin{enumerate}
+	\item instrução de desvio
+	\item sucessor sequencial
+	\item destino de desvio
+\end{enumerate}
+
+Assim, o sucessor sequêncial está no slot de atraso de desvio, pois como o atraso é de uma unidade essa instrução é executada, se o desvio for tomado ou não. Tal técnica foi implementada no IBM 801 e no intel i860.
+
+\subsection{Técnicas de Predição em Harware}
+
+As técnicas de predição de desvio estáticas implementadas em hardware podem eventualmente utilizar informações fornecidas pelo compilador. Essas técnicas se baseiam em previsões fixadas que não levam em conta a execução do programa, ou seja, não dependem do histórico de execução. Tais técnicas possuem acerto de predição relativamente baixo, entre 60\% e 70\%.
+
+\subsubsection{Always Taken}
+
+A técnica Always Taken é uma das técnicas mais simples. Tal técnica assume que os desvios seram tomados e sempre obtêm o alvo do desvio. Nos experimentos realizados por \cite{smith1981study} verificou-se que os desvios são tomados em mais de 50\% dos casos. Ou seja, pode-se dizer que buscar antecipadamente o alvo do desvio aumenta mais a taxa de acerto de desvios do que buscar antecipadamente a instrução na sequência, supondo que ambos os custos sejam iguais. Essa técnica foi utilizada pelo IBM 360/91.
+
+\subsubsection{Always Not Taken}
+
+Ao contrário da técnica anterior, a técnica Always Not Taken assume que o desvio nunca será tomado e contínua obtendo as instruções na sequência. Além da simplicidade de implementação da técnica em questão comparada com a anterior, de acordo com \cite{mcfarling1986reducing}, apesar da percentagem dos desvios tomados ser maior do que a dos desvios não tomados, tal técnica apresentou uma pequena vantagem, considerando o desenpenho geral, sobre a técnica anterior, num pipeline semelhante ao do processador MIPS-$X^2$. Isso se deve ao fato de que, na maioria das vezes, a busca da instrução alvo tem um custo maior do que a busca da instrução da sequência. Processadores reais que implementaram essa técnica para a predição de desvio foram: MC68020, i960CA e o VAX11/780.
+
+\subsubsection{Backwards Taken, Forward Not Taken (BTFNT)}
+
+A técnica de predição de devio BTFNT, assume que todos os desvios para trás serão tomados (branch taken) e que todos os desvios para frente não serão tomados (branch not taken). Tal técnica explora a ocorrência de loops nos programas, pois os loops são encerrados por uma instrução de desvio para o inicio do loop, onde existe uma outra instrução de desvio que verifica a condição de saída do loop. Dessa forma, só são tomados os desvios cujo o endereço alvo do desvio é menor do o endereço do próprio desvio. 
+
+Portanto, se o programa possui loops, então a taxa de acerto será alta. Porém, um programa pode ter instruções de desvios que não estão contidas numa estrutura regular do tipo loop, por exemplo, um programa cuja a maioria dos seus desvios são provenientes de estruturas do tipo IF-THEN-ELSE, neste contexto a taxa de acerto será bastante afetada.
+
+É possível notar que tal técnica é mais demorada do que as técnicas anteriores, pois o endereço alvo do desvio deve ser comparado com o contéudo do PC.
+
+\subsubsection{Baseada em Opcode}
+
+Outra técnica de predição de desvio estática é a técnica baseada em opcode. Tal técnica assume que todos os desvios com determinado opcode serão tomados, ou seja, o opcode que decidi se o fluxo de controle será transferido para o endereço alvo do desvio ou não. Essa técnica explora a tendência que alguns opcodes possuem de tomar um dos fluxos. Por exemplo, a instrução de chamada de subrotina, sempre segue o fluxo do desvio. Essa técnica foi utilizada por alguns modelos do System 360/370 da IBM.
+
+Os estudos feitos por \cite{smith1981study} apresenta programas para o computador CYBER 170 escritos em FORTRAN. Smith notou que as instruções de desvio ``branch if negative'', ``branch if equal'' e ``branch if greater than or equal'' normalmente são sempre tomados. Nas análises, obteve-se resultado com taxas de acertos variando de 76,2\% a 99,4\%.
+
+\subsubsection{Previsão Usando Likely/Not-Likely Bit}
+
+Essa técnica de predição de desvio estática utiliza-se de um bit, denominado likely/not-likely bit, no formato da instrução de desvio. Após o processador decodificar a instrução de desvio, ele verifica tal bit. Caso o likely/not-likely bit seja 1, ele obtêm o alvo do destino, caso contrário, ele continua obtendo as istruções na sequência. 
+
+Nos estudos de \cite{ditzel1987branch} sobre um dos processadores que utilizam essa técnica, o CRISP da AT\&T, foram obtidas taxas de acertos variando de 74\% a 94\%. 
+
+A determinação do conteúdo do bit likely/not-likely é feita pelo compilador. Em \cite{mcfarling1986reducing} os autores propoem a técnica Execution Profiling, para auxiliar o compilador na determação do bit likely/not-likely. Ou seja, o método Profiling consiste em anotar os resultados obtidos da execução do programa referentes aos desvios e o bit likely/not-likely indicará se o desvio deve ser tomado ou não, de acordo com os dados do Profiling.
+
+\section{Conclusão}
+
+Quando analisadas as consequências das instruções de desvio para a arquitetura superescalar, nota-se a importância da busca por técnicas de predição de desvio cada vez mais eficientes, para se obter cada vez mais desempenho dos processadores.
+
+Neste artigo buscou-se descrever diferentes técnicas estáticas para a predição de desvio, porém existem outras técnicas não apresentadas aqui. O desempenho alcançado pelas técnicas apresentadas depende das características do programa analisado. Tais técnicas são simples e por serem feitas antes da execução, são menos custosas se comparadas com a previção em tempo de execução.
+
+Utilizando-se a técnica de predição de desvio always taken pode-se obter taxa de 70\% para a previsão, ou ainda, pode-se obter uma variação entre 74\% e 94\%, utilizando-se a técnica baseada no bit likely/not-likely. Porém, deve-se lembrar que na análise do desempenho de uma técnica deve-se pensar não apenas na taxa de acerto de um desvio, mas também no custo de um desvio quando a previsão está correta e quando a previsão está incorreta.
+
+ Embora  as técnicas dinâmicas sejam mais eficientes do que as técnicas estáticas, uma alternativa que tem atraído a atenção dos pesquisadores consiste em usar uma combinação desses dois tipos, reduzindo-se cada vez mais o custo de execução das instruções de desvio.
+ 
+ \nocite{stallings2010arquitetura}
+ \nocite{patterson2014arquitetura}
+ \nocite{predicaoTse}
+\bibliographystyle{sbc}
+\bibliography{referencias}
+\end{document}
