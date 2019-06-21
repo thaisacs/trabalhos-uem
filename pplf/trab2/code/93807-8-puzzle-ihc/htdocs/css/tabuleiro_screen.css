@@ -1,0 +1,94 @@
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+body {
+  background-color: black;
+  font-family: 'Cabin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.tabuleiro {
+  width: 305px;
+  height: 305px;
+  border-radius: 10px;
+}
+
+.modal {
+  position: absolute;
+  transition: all .5s;
+}
+
+#startScreen {
+  background: url('/../img/start.png');
+  opacity: 1;
+  z-index: 1;
+}
+
+#endScreen {
+  background: url('/../img/end.png');
+  opacity: 0;
+  z-index: -1;
+}
+
+#endScreen2 {
+  background: url('/../img/end2.png');
+  opacity: 0;
+  z-index: -1;
+}
+
+#level1Screen {
+  background: url('/../img/1.png');
+  opacity: 1;
+  z-index: 1;
+}
+
+#level2Screen {
+  background: url('/../img/2.png');
+  opacity: 0;
+  z-index: -1;
+}
+
+#level3Screen {
+  background: url('/../img/3.png');
+  opacity: 0;
+  z-index: -1;
+}
+
+#level4Screen {
+  background: url('/../img/4.png');
+  opacity: 0;
+  z-index: -1;
+}
+
+#level5Screen {
+  background: url('/../img/5.png');
+  opacity: 0;
+  z-index: -1;
+}
+
+#container {
+  position: relative;
+  margin: 50px auto;
+  background-color: #ccc;
+  border: outset #6ff2c1;
+  box-shadow: 2px 2px 20px rgba(111,242,193,0.8);
+}
+
+.tile {
+  width: 90px;
+  height: 90px;
+  position: absolute;
+  transition: left .5s, top .5s;
+}
+
+.tile:hover {
+  border: inset;
+  border-radius: 10px;
+}
+
+.showSolve {
+  color: #1d9b6c;
+  text-align: center;
+}
