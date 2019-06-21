@@ -2,10 +2,10 @@ import numpy as np
 import cv2
 
 #abre imagem em tons de cinza
-img_in = cv2.imread("images/paredeTijolos.jpg",0)
+img_in = cv2.imread("/home/ramires/GIT/trabalhos-uem/pdi/trab2/images/720p/abstrato2-720p.jpg",0)
 
 #definicao do tipo da mascara
-tipo = 3
+tipo = 4
 
 #TIPO:
 #0: mascara identidade
@@ -15,7 +15,7 @@ tipo = 3
 #4: Prewitt borda vertical
 
 #definicao do algoritmo
-algoritmo = 0
+algoritmo = 1
 
 #ALGORITMO
 #0: correlacao por translacao
@@ -91,11 +91,13 @@ def multiplicar_mascara(mascara, crop):
 
 if(algoritmo == 0):
     cv2.imshow("image in",img_in)
-    cv2.imshow("image out",correlacao_translacao(img_in))
+    img_out = correlacao_translacao(img_in)
+    cv2.imshow("image out",img_out)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 else:
     cv2.imshow("image in",img_in)
-    cv2.imshow("image out",correlacao_for_ij(img_in))
+    img_out = correlacao_for_ij(img_in)
+    cv2.imshow("image out",img_out)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
