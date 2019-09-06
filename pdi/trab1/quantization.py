@@ -14,9 +14,10 @@ import matplotlib.pyplot as plt
 from operator import itemgetter
 import sys
 from math import sqrt
+import math
 
-img_name = 'images/daith2.jpg'
-n = 2 
+img_name = 'images/strawberries_fullcolor.tif'
+n = 128 
 mode = 2
 # 1: Uniform
 # 2: Median Cut
@@ -74,9 +75,6 @@ def create_LUT(n):
 
 def uniform(img_in, n):
     x,y,z = split_cube(n)
-    print(x)
-    print(y)
-    print(z)
     r,g,b = cv2.split(img_in)
     
     r[:] = (create_LUT(x))[r[:]]
@@ -206,6 +204,24 @@ def median_cut(img_in, n):
     
     return apply_colors(img_in, colors)
 
+def cpsnr(img1, img2):
+    r1,g1,b1 = cv2.split(img1)
+    r2,g2,b2 = cv2.split(img2)
+    
+    mser = np.mean((r1 - r2) ** 2)
+    mseg = np.mean((g1 - g2) ** 2)
+    mseb = np.mean((b1 - b2) ** 2)
+    
+    if mser == 0 or mseg == 0 or mseb == 0:
+        return 100
+    pixel_max = 255.0
+
+    resultr = 20 * math.log10(pixel_max/math.sqrt(mser))
+    resultg = 20 * math.log10(pixel_max/math.sqrt(mseg))
+    resultb = 20 * math.log10(pixel_max/math.sqrt(mseb))
+
+    return resultr + resultg + resultb
+
 def main():
     img_in = read_rgb(img_name)
     
@@ -214,6 +230,8 @@ def main():
     else:
         img_out = median_cut(img_in, n);
     
+    d = cpsnr(img_in, img_out)
+    print(d)
     write_rgb(str(n)+'.jpg', img_out)
 
 main()

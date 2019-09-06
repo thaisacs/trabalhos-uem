@@ -5,7 +5,7 @@ import cv2
 img_in = cv2.imread("images/paredeTijolos.jpg",0)
 
 #definicao do tipo da mascara
-tipo = 4
+tipo = 2
 
 #TIPO:
 #0: mascara identidade
@@ -89,13 +89,20 @@ def multiplicar_mascara(mascara, crop):
     out = mascara * crop
     return np.sum(out)
 
+def write_img(name, img):
+    cv2.imwrite(name, img)
+
+
+write_img("image.jpg",img_in)
 if(algoritmo == 0):
-    cv2.imshow("image in",img_in)
-    cv2.imshow("image out",correlacao_translacao(img_in))
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    write_img("image_r.jpg",correlacao_translacao(img_in))
+    #cv2.imshow("image in",img_in)
+    #cv2.imshow("image out",correlacao_translacao(img_in))
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 else:
-    cv2.imshow("image in",img_in)
-    cv2.imshow("image out",correlacao_for_ij(img_in))
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    write_img("image_r.jpg",correlacao_for_ij(img_in))
+    #cv2.imshow("image in",img_in)
+    #cv2.imshow("image out",correlacao_for_ij(img_in))
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
