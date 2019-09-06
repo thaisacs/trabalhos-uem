@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 #abre imagem em tons de cinza
-img_in = cv2.imread("images/paredeTijolos.jpg",0)
+img_in = cv2.imread("/home/ramires/GIT/trabalhos-uem/pdi/trab2/images/720p/abstrato2-720p.jpg",0)
 
 #definicao do tipo da mascara
 tipo = 2
@@ -15,7 +15,7 @@ tipo = 2
 #4: Prewitt borda vertical
 
 #definicao do algoritmo
-algoritmo = 0
+algoritmo = 1
 
 #ALGORITMO
 #0: correlacao por translacao
@@ -95,14 +95,14 @@ def write_img(name, img):
 
 write_img("image.jpg",img_in)
 if(algoritmo == 0):
-    write_img("image_r.jpg",correlacao_translacao(img_in))
-    #cv2.imshow("image in",img_in)
-    #cv2.imshow("image out",correlacao_translacao(img_in))
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+    cv2.imshow("image in",img_in)
+    img_out = correlacao_translacao(img_in)
+    cv2.imshow("image out",img_out)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 else:
-    write_img("image_r.jpg",correlacao_for_ij(img_in))
-    #cv2.imshow("image in",img_in)
-    #cv2.imshow("image out",correlacao_for_ij(img_in))
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+    cv2.imshow("image in",img_in)
+    img_out = correlacao_for_ij(img_in)
+    cv2.imshow("image out",img_out)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
