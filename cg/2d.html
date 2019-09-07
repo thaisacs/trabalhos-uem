@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head lang="pt-br">
+  <title>CGDraw</title>
+  <link rel="stylesheet" type="text/css" href="style/style_2d.css" />
+  <link rel="stylesheet" type="text/css" href="style/modal.css" />
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+</head>
+<body>
+  <nav id="navActions">
+    <ul>
+      <li id="btnClean">Clear</li>
+      <li id="btnTranslate">Translação</li>
+      <li id="btnRotate">Rotação</li>
+      <li id="btnScale">M. Escala</li>
+      <li id="btnZoom">Zoom</li>
+      <li id="btnZExtend">Zoom Extend</li>
+      <li style="float: right" id="btnHelp">Ajuda</li>
+    </ul>
+  </nav>
+  <div class="flexContainer">
+    <div class="navFlex">
+      <nav id="navObjects">
+        <ul>
+          <li id="btnLine">Reta</li>
+          <li id="btnTriangle">Triângulo</li>
+          <li id="btnSquare">Retângulo</li>
+          <li id="btnCircle">Círculo</li>
+        </ul>
+      </nav>
+    </div>
+    <div class="main">
+      <canvas id="mainCanvas" width="900" height="560"></canvas>
+      <div class="info">
+        <span class="label">X:      </span><span id="X">0</span>
+        <span class="label">Y:      </span><span id="Y">0</span>
+        <span class="label">Dx:     </span><span id="dx">0</span>
+        <span class="label">Dy:     </span><span id="dy">0</span>
+        <span class="label">Sx:     </span><span id="sx">0</span>
+        <span class="label">Sy:     </span><span id="sy">0</span>
+        <span class="label">Cos:    </span><span id="cos">0</span>
+        <span class="label">Sen:    </span><span id="sin">0</span>
+        <span class="label">Ângulo: </span><span id="ang">0</span>
+      </div>
+    </div>
+    <div class="subMain">
+      <div class="divCmd">
+        <h1>Terminal</h1>
+        <div class="msg" id="msgs"></div>
+        <div class="cmdLine">
+          <input id="inputCMD" type="text" placeholder="entre com o comando..."></input>
+        </div>
+      </div>
+      <div class="options">
+        <!-- <input type="checkbox" id="fill" name="fill"/><label for="fill">Preencher com </label><input id="defineColor" type="color"/><br/> -->
+        <input type="checkbox" id="datail" name="datail"/><label for="datail">Detralhar</label>
+      </div>
+    </div>
+  </div>
+  <!-- modals -->
+  <div class="window" id="modalHelp1">
+    <a href="#" class="close">X</a>
+    <h4>Ajuda</h4>
+    <div class="container">
+      O <span style="color: #DB7093">CGDraw</span> possui iteração com o mouse e por linha de comando.
+      Abaixo segue algumas dicas de como usar o programa em cada modo de iteração.<br/><br/>
+      <span style="text-transform: uppercase;color: #DB7093">Informar um Ponto</span><br/>
+      Para informar um ponto no modo de iteração com o mouse, basta clicar no canvas. Já no modo linha de comando
+      utiliza-se o comando "x,y".
+      <br/><br/>
+      <span style="text-transform: uppercase;color: #DB7093">Desenhar</span><br/>
+      <b>Reta:</b> para desenhar uma reta, basta selecionar no menu a opção RETA
+      ou usar o comando "reta". Após isso, deve-se informar dois pontos: Ponto A e Ponto B.
+      <br/><br/>
+      <b>Triângulo:</b> para desenhar um triângulo, basta selecionar no menu a opção TRIÂNGULO
+      ou usar o comando "triangulo". Após isso, deve-se informar três pontos: Ponto A, Ponto B e Ponto C.
+      <br/><br/>
+      <b>Retângulo:</b> para desenhar um retângulo, basta selecionar no menu a opção RETÂNGULO
+      ou usar o comando "retangulo". Após isso, deve-se informar dois pontos: Ponto A e Ponto B.
+      <br/><br/>
+      <b>Círculo:</b> para desenhar um círculo, basta selecionar no menu a opção CÍRCULO
+      ou usar o comando "circulo". Após isso, deve-se informar dois pontos: Ponto A (centro do círculo)
+      e Ponto B (distância do Ponto A até o Ponto B será o raio).<br/>
+      <a class="btnModal" id="next">Próximo</a>
+    </div>
+  </div>
+  <div class="window" id="modalHelp2">
+    <a href="#" class="close">X</a>
+    <h4>Ajuda</h4>
+    <div class="container">
+      <span style="text-transform: uppercase;color: #DB7093">Janela de Seleção e Janela de Zoom</span><br/>
+      Ambas as janelas são definidas informando dois pontos: Ponto A e Ponto B.
+      </br></br>
+      <span style="text-transform: uppercase;color: #DB7093">Operações</span><br/>
+      <b>Translação:</b> a translação é constituída por:
+      <ol>
+        <li>Selecionar os objetos que irão sofrer a translação (janela de seleção)</li>
+        <li>Informar um ponto de referência</li>
+        <li>Informar um ponto de destino</li>
+      </ol>
+      Com base no ponto de referência e de destino é calculado o Dx e Dy. A translação pode ser ativada
+      escolhendo a opção TRANSLAÇÃO no menu ou utilizando o comando "translacao".
+      </br></br>
+      <b>Rotação:</b> a rotação é contituída por:
+      <ol>
+        <li>Selecionar os objetos que irão sofrer a rotação</li>
+        <li>Informar o ponto de rotação</li>
+        <li>Informar um segundo ponto</li>
+      </ol>
+      A rotação vai calcular o ângulo considerando o ponto de rotação e o segundo ponto.<br/><br/>
+      <a class="btnModal" id="next2">Próximo</a>
+      <a class="btnModal" id="back">Anterior</a>
+    </div>
+  </div>
+  <div class="window" id="modalHelp3">
+    <a href="#" class="close">X</a>
+    <h4>Ajuda</h4>
+    <div class="container">
+      Como alternativa, no passo 3, ao invés de informar um ponto de referência, pode-se
+      informar o ângulo (graus) na linha de comando.
+
+      A rotação pode ser ativada
+      escolhendo a opção ROTAÇÃO no menu ou utilizando o comando "rotacao".
+      </br></br>
+      <b>M. Escala:</b> a escala é contituída por:
+      <ol>
+        <li>Selecionar os objetos que irão sofrer a mudança de escala</li>
+        <li>Informar um ponto de referência</li>
+        <li>Informar um segundo ponto</li>
+      </ol>
+      Com base no ponto de referência e no segundo ponto é calculado o Sx e Sy. A escala pode ser ativada
+      escolhendo a opção M. ESCALA no menu ou utilizando o comando "escala".
+      </br></br>
+      <b>Zoom:</b> para ativar o zoom deve-se escolher a opção ZOOM no menu ou utilizar o comando "zoom".
+      Essa operação é contituída pela definição da janela de zoom.
+      </br></br>
+      <b>Zoom Extend:</b> para ativar o zoom extend deve-se escolher a opção ZOOM EXTEND
+      no menu ou utilizar o comando "zextend".<br/><br/>
+      <b>Detalhar:</b> quando ativado exibe o cálculo da transformação, quando considerado apenas um objeto.<br/>
+      <a class="btnModal" id="back2">Anterior</a>
+    </div>
+  </div>
+  <div class="windowT" id="modalDetail">
+    <a href="#" class="close">X</a>
+    <h4>Tranformação</h4>
+    <div class="container" id="modalTransf">
+      <!-- add info with jQuery -->
+    </div>
+  </div>
+  <div id="mask"></div>
+  <!-- jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <script src="script/all/detail.js"></script>
+  <script src="script/all/help.js"></script>
+  <!-- scripts -->
+  <script src="script/2d/options.js"></script>
+  <script src="script/2d/action.js"></script>
+  <script src="script/2d/elements.js"></script>
+  <script src="script/2d/util.js"></script>
+  <script src="script/2d/draw.js"></script>
+</body>
+</html>

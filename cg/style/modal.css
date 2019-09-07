@@ -1,0 +1,79 @@
+.window {
+    display:none;
+    width:600px;
+    height:500px;
+    position:absolute;
+    left:0;
+    top:0;
+    background: #414141;
+    color: #fff;
+    z-index:9900;
+    border-radius:5px;
+}
+
+.windowT {
+    display:none;
+    width:1300px;
+    height:250px;
+    position:absolute;
+    left:0;
+    top:0;
+    background: #414141;
+    color: #fff;
+    z-index:9900;
+    border-radius:5px;
+}
+
+.window h4, .windowT h4 {
+  text-align: center;
+  margin: 0;
+  padding: 10px;
+  background-color: #DB7093;
+}
+
+.container {
+  padding: 10px;
+  position: relative;
+}
+
+#mask {
+    display:none;
+    position:absolute;
+    left:0;
+    top:0;
+    z-index:9000;
+    background-color:#000;
+}
+
+.close {
+  background: #606061;
+	color: #FFFFFF;
+	line-height: 25px;
+	position: absolute;
+	right: -12px;
+	text-align: center;
+	top: -10px;
+	width: 24px;
+	text-decoration: none;
+	font-weight: bold;
+	-webkit-border-radius: 12px;
+	-moz-border-radius: 12px;
+	border-radius: 12px;
+	-moz-box-shadow: 1px 1px 3px #000;
+	-webkit-box-shadow: 1px 1px 3px #000;
+	box-shadow: 1px 1px 3px #000;
+}
+
+.btnModal {
+  float: right;
+  background-color: #212121;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.btnModal:hover {
+  background-color: #DB7093;
+  color: black;
+}
+
+.close:hover { background: #DB7093; }
